@@ -6,10 +6,8 @@ export class ScoreCalculationService {
 
   calculateScoreForAllFrames(frames: Frame[]): Frame[] {
     return frames.map((frame, index) => {
-      return {
-        ...frame,
-        sum: this.calculateScoreForFrame(frames, index)
-      };
+      frame.sum = this.calculateScoreForFrame(frames, index);
+      return frame
     });
   }
 

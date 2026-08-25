@@ -11,6 +11,7 @@ describe('Frame', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(FrameView);
+    fixture.componentRef.setInput('frame', { rolls: [], type: 'open', isLast: false });
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
