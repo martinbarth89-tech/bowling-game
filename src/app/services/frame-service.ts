@@ -1,14 +1,16 @@
 import {inject, Service, Signal, signal} from '@angular/core';
 import {GameRuleService} from './game-rule-service';
 import {Frame} from '../models/bowling-models';
+import {ScoreCalculationService} from './score-calculation-service';
 
 @Service()
 export class FrameService {
   private gameRuleService = inject(GameRuleService);
+  private scoreCalculationService = inject(ScoreCalculationService);
 
-  private gameIsOver = signal(false);
+  private gameCompleted = signal(false);
   private currentFrameIndex = signal(0);
-  readonly allFrames = signal<Frame[]>(this.getInitialFrames());
+  readonly frames = signal<Frame[]>(this.getInitialFrames());
 
   private getInitialFrames(): Frame[] {
     return [
@@ -30,57 +32,52 @@ export class FrameService {
   }
 
   resetGame() {
-    this.allFrames.set(this.getInitialFrames());
+    this.frames.set(this.getInitialFrames());
     this.currentFrameIndex.set(0);
-    this.gameIsOver.set(false);
+    this.gameCompleted.set(false);
   }
 
   roll(pins: number | null) {
-    if (this.gameIsOver()) {
-      throw new Error('Game is over. Reset the game')
-    }
+    if (this.gameCompleted()) throw new Error('Game is over. Reset the game.')
 
-    if (!pins && pins !== 0) {
-      throw new Error('Invalid pins input')
-    }
+    if (!pins && pins !== 0) throw new Error('Invalid input.')
 
-    if (pins < 0 || pins > 10) {
-      throw new Error('Invalid pins amount. Min 0, max 10 pins');
-    }
+    if (pins < 0 || pins > 10) throw new Error('Invalid pins amount. Min 0, max 10 pins');
 
-    const currentFrame = this.allFrames()[this.currentFrameIndex()]
+    const currentFrame = this.frames()[this.currentFrameIndex()]
     if (this.gameRuleService.framePinAmountExceeded(currentFrame, pins)){
       throw new Error('Pin amount exceeded');
     }
 
-    this.updateFrames(pins);
+    this.updateFrameWithPins(pins);
   }
 
-  private updateFrames(pins: number) {
-    this.allFrames.update(frames => {
+  private updateFrameWithPins(pins: number) {
+    this.frames.update(frames => {
       const currentFrameIndex = this.currentFrameIndex();
 
-      const updatedFrame = this.updateFrame(frames[currentFrameIndex], pins);
+      const updatedTargetFrame = this.updateFrame(frames[currentFrameIndex], pins);
 
-      const isFrameCompleted = this.gameRuleService.isFrameCompleted(updatedFrame);
+      const isFrameCompleted = this.gameRuleService.isFrameCompleted(updatedTargetFrame);
       if (isFrameCompleted) {
-        if (!updatedFrame.isLast) {
-          this.increaseCurrentFrameIndex();
+        if (updatedTargetFrame.isLast) {
+          this.gameCompleted.set(true);
         } else {
-          this.gameIsOver.set(true);
+          this.nextFrame();
         }
       }
 
-      return frames.map((frame, arrayIndex) => {
-        if (arrayIndex === currentFrameIndex) {
-          return updatedFrame
-        }
-        return frame;
+      let updatedFrames = frames.map((frame, arrayIndex) => {
+        return arrayIndex === currentFrameIndex ? updatedTargetFrame : frame;
       });
+
+      updatedFrames = this.scoreCalculationService.calculateScoreForAllFrames(updatedFrames);
+
+      return updatedFrames
     })
   }
 
-  private increaseCurrentFrameIndex(){
+  private nextFrame(){
     this.currentFrameIndex.set(this.currentFrameIndex() + 1);
   }
 
@@ -93,6 +90,6 @@ export class FrameService {
   }
 
   getGameIsOver(): Signal<boolean> {
-    return this.gameIsOver.asReadonly();
+    return this.gameCompleted.asReadonly();
   }
 }

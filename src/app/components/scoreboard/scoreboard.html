@@ -1,5 +1,5 @@
 <div class="flex flex-row">
-  @for (frame of frameService.allFrames(); track $index) {
+  @for (frame of frameService.frames(); track $index) {
     <app-frame-view [frame]="frame"></app-frame-view>
   }
 </div>
