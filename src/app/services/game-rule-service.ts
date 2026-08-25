@@ -5,13 +5,13 @@ import {ScoreCalculationService} from './score-calculation-service';
 @Service()
 export class GameRuleService {
   private scoreCalculationService = inject(ScoreCalculationService);
-  readonly maxPinAmount: number = 10;
+  readonly MAX_PIN_AMOUNT: number = 10;
 
   getFrameRule(frame: Frame, pins: number): GameRule {
     const currentFrameSum: number = this.scoreCalculationService.calculateSum(frame.rolls);
     const maxPinAmount = this.calculateMaxPinAmount(frame)
 
-    // if it's the last frame but with bonus roll, return the old frame rule
+    // if it's the last frame but with bonus roll, return the current frame rule
     if (this.isLastFrameWithBonusRoll(frame)) {
       return frame.rule
     }
@@ -20,7 +20,7 @@ export class GameRuleService {
 
     if (frame.rolls.length > 0 && currentFrameSum + pins === maxPinAmount) return 'spare';
 
-    return 'default'
+    return 'open'
   }
 
   isFrameCompleted(frame: Frame): boolean {
@@ -36,7 +36,7 @@ export class GameRuleService {
   }
 
   framePinAmountExceeded(frame: Frame, pins: number): boolean {
-    if (pins > this.maxPinAmount) {
+    if (pins > this.MAX_PIN_AMOUNT) {
       return true;
     }
 
@@ -46,10 +46,17 @@ export class GameRuleService {
 
   private calculateMaxPinAmount(frame: Frame) {
     if (this.isLastFrameWithBonusRoll(frame)) {
-      return this.maxPinAmount * 3;
+
+      // this happens when in the 10th frame the second roll is not a strike
+      if (frame.rule === 'strike' && frame.rolls.length >= 2 && frame.rolls[1] < 10) {
+        return this.MAX_PIN_AMOUNT * 2;
+      }
+
+      // this happens when in the 10th frame are just strikes
+      return this.MAX_PIN_AMOUNT * 3;
     }
 
-    return this.maxPinAmount;
+    return this.MAX_PIN_AMOUNT;
   }
 
   isLastFrameWithBonusRoll(frame: Frame): boolean {

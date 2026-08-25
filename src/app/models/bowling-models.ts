@@ -5,4 +5,9 @@ export interface Frame {
   sum?: number;
 }
 
-export type GameRule = 'default' | 'spare' | 'strike';
+export type GameRule = 'open' | 'spare' | 'strike';
+
+export interface RollResult {
+  success: boolean;
+  message?: string;
+}
