@@ -160,7 +160,6 @@ describe('GameRuleService', () => {
       expect(service.framePinAmountExceeded(frame, 7)).toBe(true);
     });
   });
-
   describe('framePinAmountExceeded - 10th frame', () => {
     it('should return false when pins <= 10 for open type in 10th frame', () => {
       const frame: Frame = { rolls: [4], type: 'open', isLast: true };
@@ -186,4 +185,30 @@ describe('GameRuleService', () => {
     });
   });
 
+  describe('isLastFrameWithBonusRoll', () => {
+    it('should return false because open type', () => {
+      const frame: Frame = { rolls: [4], type: 'open', isLast: true };
+      expect(service.isLastFrameWithBonusRoll(frame)).toBe(false);
+    });
+
+    it('should return false because is not last', () => {
+      const frame: Frame = { rolls: [4], type: 'strike', isLast: false };
+      expect(service.isLastFrameWithBonusRoll(frame)).toBe(false);
+    });
+
+    it('should return false because is not last', () => {
+      const frame: Frame = { rolls: [4], type: 'spare', isLast: false };
+      expect(service.isLastFrameWithBonusRoll(frame)).toBe(false);
+    });
+
+    it('should return true because spare type', () => {
+      const frame: Frame = { rolls: [4,6], type: 'spare', isLast: true };
+      expect(service.isLastFrameWithBonusRoll(frame)).toBe(true);
+    });
+
+    it('should return true because spare type', () => {
+      const frame: Frame = { rolls: [10,6], type: 'strike', isLast: true };
+      expect(service.isLastFrameWithBonusRoll(frame)).toBe(true);
+    });
+  });
 });
