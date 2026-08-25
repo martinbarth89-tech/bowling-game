@@ -119,11 +119,11 @@ describe('GameRuleService', () => {
     it('should not complete after 2 rolls if spare. entitled to 3rd bonus roll.', () => {
       const frame: Frame = { rolls: [4, 6], rule: 'spare', isLast: true };
       expect(service.isFrameCompleted(frame)).toBe(false);
+    });
 
-      it('should complete after 3 rolls. spare and bonus', () => {
-        const frame: Frame = { rolls: [5, 5, 8], rule: 'spare', isLast: true };
-        expect(service.isFrameCompleted(frame)).toBe(true);
-      })
+    it('should complete after 3 rolls. spare and bonus', () => {
+      const frame: Frame = { rolls: [5, 5, 8], rule: 'spare', isLast: true };
+      expect(service.isFrameCompleted(frame)).toBe(true);
     });
 
     it('should not complete after 2 rolls if strike in first roll.', () => {
@@ -135,8 +135,55 @@ describe('GameRuleService', () => {
       const frame: Frame = { rolls: [10, 10, 10], rule: 'strike', isLast: true };
       expect(service.isFrameCompleted(frame)).toBe(true);
     });
+  });
 
+  describe('framePinAmountExceeded - 1st-9th frames', () => {
+    it('should return false when first roll pins <= 10', () => {
+      const frame: Frame = { rolls: [], rule: 'default', isLast: false };
+      expect(service.framePinAmountExceeded(frame, 10)).toBe(false);
+      expect(service.framePinAmountExceeded(frame, 5)).toBe(false);
+    });
 
+    it('should return true when first roll pins > 10', () => {
+      const frame: Frame = { rolls: [], rule: 'default', isLast: false };
+      expect(service.framePinAmountExceeded(frame, 11)).toBe(true);
+    });
+
+    it('should return false when sum of rolls and pins <= 10', () => {
+      const frame: Frame = { rolls: [4], rule: 'default', isLast: false };
+      expect(service.framePinAmountExceeded(frame, 6)).toBe(false);
+      expect(service.framePinAmountExceeded(frame, 3)).toBe(false);
+    });
+
+    it('should return true when sum of rolls and pins > 10', () => {
+      const frame: Frame = { rolls: [4], rule: 'default', isLast: false };
+      expect(service.framePinAmountExceeded(frame, 7)).toBe(true);
+    });
+  });
+
+  describe('framePinAmountExceeded - 10th frame', () => {
+    it('should return false when pins <= 10 for default rule in 10th frame', () => {
+      const frame: Frame = { rolls: [4], rule: 'default', isLast: true };
+      expect(service.framePinAmountExceeded(frame, 6)).toBe(false);
+    });
+
+    it('should return true when pins > 10 for default rule in 10th frame', () => {
+      const frame: Frame = { rolls: [4], rule: 'default', isLast: true };
+      expect(service.framePinAmountExceeded(frame, 7)).toBe(true);
+    });
+
+    it('should allow up to 30 pins in total for strike in 10th frame', () => {
+      const frame: Frame = { rolls: [10, 10], rule: 'strike', isLast: true };
+      expect(service.framePinAmountExceeded(frame, 10)).toBe(false);
+      expect(service.framePinAmountExceeded(frame, 11)).toBe(true);
+    });
+
+    it('should allow up to 30 pins in total for spare in 10th frame', () => {
+      const frame: Frame = { rolls: [5, 5], rule: 'spare', isLast: true };
+      expect(service.framePinAmountExceeded(frame, 10)).toBe(false);
+      expect(service.framePinAmountExceeded(frame, 20)).toBe(true);
+      expect(service.framePinAmountExceeded(frame, 21)).toBe(true);
+    });
   });
 
 });

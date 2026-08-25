@@ -36,6 +36,10 @@ export class GameRuleService {
   }
 
   framePinAmountExceeded(frame: Frame, pins: number): boolean {
+    if (pins > this.maxPinAmount) {
+      return true;
+    }
+
     const maxPinAmount = this.calculateMaxPinAmount(frame);
     return this.scoreCalculationService.calculateSum(frame.rolls) + pins > maxPinAmount;
   }
