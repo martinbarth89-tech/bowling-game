@@ -1,13 +1,13 @@
 import {inject, Service, Signal, signal} from '@angular/core';
-import {Frame} from '../components/frame/frame-view.component';
 import {GameRuleService} from './game-rule-service';
+import {Frame} from '../models/bowling-models';
 
 @Service()
 export class FrameService {
-  private currentFrameIndex = signal(0);
-  private readonly maxFrames = 10;
   private gameRuleService = inject(GameRuleService);
 
+  private gameIsOver = signal(false);
+  private currentFrameIndex = signal(0);
   readonly allFrames = signal<Frame[]>(this.getInitialFrames());
 
   private getInitialFrames(): Frame[] {
@@ -32,9 +32,14 @@ export class FrameService {
   resetGame() {
     this.allFrames.set(this.getInitialFrames());
     this.currentFrameIndex.set(0);
+    this.gameIsOver.set(false);
   }
 
   roll(pins: number | null) {
+    if (this.gameIsOver()) {
+      throw new Error('Game is over. Reset the game')
+    }
+
     if (!pins && pins !== 0) {
       throw new Error('Invalid pins input')
     }
@@ -48,31 +53,46 @@ export class FrameService {
       throw new Error('Pin amount exceeded');
     }
 
-    this.updateFramesSignal(pins);
+    this.updateFrames(pins);
   }
 
-  private updateFramesSignal(pins: number) {
+  private updateFrames(pins: number) {
     this.allFrames.update(frames => {
       const currentFrameIndex = this.currentFrameIndex();
 
-      const updatedFrames = frames.map((frame, arrayIndex) => {
+      const updatedFrame = this.updateFrame(frames[currentFrameIndex], pins);
+
+      const isFrameCompleted = this.gameRuleService.isFrameCompleted(updatedFrame);
+      if (isFrameCompleted) {
+        if (!updatedFrame.isLast) {
+          this.increaseCurrentFrameIndex();
+        } else {
+          this.gameIsOver.set(true);
+        }
+      }
+
+      return frames.map((frame, arrayIndex) => {
         if (arrayIndex === currentFrameIndex) {
-          const updatedFrame = {
-            ...frame,
-            rule: this.gameRuleService.getFrameRule(frame, pins),
-            rolls: [...frame.rolls, pins]
-          };
-
-          if (this.gameRuleService.isFrameCompleted(updatedFrame)) {
-            this.currentFrameIndex.set(currentFrameIndex + 1);
-          }
-
           return updatedFrame
         }
         return frame;
       });
-
-      return updatedFrames;
     })
+  }
+
+  private increaseCurrentFrameIndex(){
+    this.currentFrameIndex.set(this.currentFrameIndex() + 1);
+  }
+
+  private updateFrame(frame: Frame, pins: number): Frame {
+    return {
+      ...frame,
+      rule: this.gameRuleService.getFrameRule(frame, pins),
+      rolls: [...frame.rolls, pins]
+    };
+  }
+
+  getGameIsOver(): Signal<boolean> {
+    return this.gameIsOver.asReadonly();
   }
 }

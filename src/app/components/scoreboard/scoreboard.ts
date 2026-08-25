@@ -1,6 +1,6 @@
 import {Component, inject} from '@angular/core';
-import {Frame, FrameView} from '../frame/frame-view.component';
 import {FrameService} from '../../services/frame-service';
+import {FrameView} from '../frame/frame-view.component';
 
 @Component({
   imports: [

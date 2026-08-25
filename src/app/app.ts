@@ -1,21 +1,32 @@
-import {Component, inject} from '@angular/core';
-import {MatFormField, MatInput, MatLabel} from '@angular/material/input';
+import {Component, inject, signal} from '@angular/core';
 import {MatButton} from '@angular/material/button';
 import {Scoreboard} from './components/scoreboard/scoreboard';
 import {FrameService} from './services/frame-service';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
+import {MatFormField, MatInput, MatLabel} from '@angular/material/input';
 
 @Component({
   selector: 'app-root',
-  imports: [MatFormField, MatLabel, MatInput, MatButton, Scoreboard, ReactiveFormsModule],
+  imports: [MatButton, Scoreboard, ReactiveFormsModule, MatFormField, MatLabel, MatInput],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
   frameService = inject(FrameService);
+  buttonsArray: number[] = [...Array(11).keys()];
   rollInput = new FormControl<number>(0);
+  showError = signal<string | null>(null);
 
-  roll() {
-    this.frameService.roll(this.rollInput.value)
+  roll(pins: number | null) {
+    try {
+      this.frameService.roll(pins)
+      this.showError.set(null);
+    } catch (error: any) {
+      this.showError.set(error.message);
+    }
+  }
+
+  resetGame() {
+    this.frameService.resetGame();
   }
 }

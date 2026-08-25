@@ -1,15 +1,33 @@
 <div class="flex flex-col gap-10 items-center">
   <h1>Bowling-Game</h1>
 
-  <div class="flex flex-row gap-10 items-center">
-    <mat-form-field class="example-full-width" [subscriptSizing]="'dynamic'">
-      <mat-label>Pinanzahl von 0-10</mat-label>
-      <input matInput type="number" [formControl]="rollInput">
-    </mat-form-field>
+  <div class="flex flex-col gap-10 items-center">
+    <div class="flex flex-row items-center gap-2">
+      <mat-form-field class="example-full-width" [subscriptSizing]="'dynamic'">
+        <mat-label>Pinanzahl von 0-10</mat-label>
+        <input matInput type="number" [formControl]="rollInput">
+      </mat-form-field>
 
-    <button mat-flat-button [disabled]="rollInput.value === null" (click)="roll()">Roll</button>
-    <button mat-flat-button (click)="frameService.resetGame()">Reset Game</button>
+      <button mat-flat-button [disabled]="frameService.getGameIsOver()()" (click)="roll(rollInput.value)">Roll Input</button>
+    </div>
+
+    <div class="flex flex-row gap-2 items-center">
+      @for (pinAmount of buttonsArray; track $index) {
+        <button mat-flat-button [disabled]="frameService.getGameIsOver()()"  (click)="roll(pinAmount)">{{pinAmount}} Pins</button>
+      }
+    </div>
+
+    <button mat-flat-button (click)="resetGame()">Reset Game</button>
   </div>
 
   <app-scoreboard></app-scoreboard>
+
+  @if (frameService.getGameIsOver()()) {
+    <h1 style="color: darkgreen">Game Over</h1>
+  }
+
+  @if (showError(); as error) {
+    <h1 style="color: darkred">{{error}}</h1>
+  }
+
 </div>
