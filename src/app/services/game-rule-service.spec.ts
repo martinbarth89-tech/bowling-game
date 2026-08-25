@@ -16,7 +16,70 @@ describe('GameRuleService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('isFrameCompleted for normal frames (1-9)', () => {
+  describe('getFrameRule - 1st-9th frames (strike, spare, default)', () => {
+    it('should complete with first roll: pins < 10 -> default', () => {
+      const frame: Frame = { rolls: [], rule: 'default', isLast: false };
+      const pins = 6;
+      expect(service.getFrameRule(frame, pins)).toBe('default');
+    });
+
+    it('should complete with two rolls: pins < 10 -> default', () => {
+      const frame: Frame = { rolls: [6], rule: 'default', isLast: false };
+      const pins = 3;
+      expect(service.getFrameRule(frame, pins)).toBe('default');
+    });
+
+    it('should complete with two rolls: pins === 10 -> spare', () => {
+      const frame: Frame = { rolls: [6], rule: 'default', isLast: false };
+      const pins = 4;
+      expect(service.getFrameRule(frame, pins)).toBe('spare');
+    });
+
+    it('should complete with one roll: pins === 10 -> strike', () => {
+      const frame: Frame = { rolls: [], rule: 'default', isLast: false };
+      const pins = 10;
+      expect(service.getFrameRule(frame, pins)).toBe('strike');
+    });
+  });
+  describe('getFrameRule - 10th frames (strike, spare, default)', () => {
+    it('should complete with first roll: pins < 10 -> default', () => {
+      const frame: Frame = { rolls: [], rule: 'default', isLast: true };
+      const pins = 6;
+      expect(service.getFrameRule(frame, pins)).toBe('default');
+    });
+
+    it('should complete with first roll: pins === 10 -> strike', () => {
+      const frame: Frame = { rolls: [], rule: 'default', isLast: true };
+      const pins = 10;
+      expect(service.getFrameRule(frame, pins)).toBe('strike');
+    });
+
+    it('should complete with two rolls: pins < 10 -> default', () => {
+      const frame: Frame = { rolls: [6], rule: 'default', isLast: true };
+      const pins = 3;
+      expect(service.getFrameRule(frame, pins)).toBe('default');
+    });
+
+    it('should complete with two rolls: pins === 10 -> spare', () => {
+      const frame: Frame = { rolls: [6], rule: 'default', isLast: true };
+      const pins = 4;
+      expect(service.getFrameRule(frame, pins)).toBe('spare');
+    });
+
+    it('should complete, rule should stay -> spare', () => {
+      const frame: Frame = { rolls: [6, 4], rule: 'spare', isLast: true };
+      const pins = 10;
+      expect(service.getFrameRule(frame, pins)).toBe('spare');
+    });
+
+    it('should complete, rule should stay -> strike', () => {
+      const frame: Frame = { rolls: [10, 10], rule: 'strike', isLast: true };
+      const pins = 10;
+      expect(service.getFrameRule(frame, pins)).toBe('strike');
+    });
+  });
+
+  describe('isFrameCompleted - 1st-9th frames', () => {
     it('should complete on strike in first roll', () => {
       const frame: Frame = { rolls: [10], rule: 'strike', isLast: false };
       expect(service.isFrameCompleted(frame)).toBe(true);
@@ -37,8 +100,7 @@ describe('GameRuleService', () => {
       expect(service.isFrameCompleted(frame)).toBe(true);
     });
   });
-
-  describe('isFrameCompleted for 10th frame (isLast = true)', () => {
+  describe('isFrameCompleted - 10th frame', () => {
     it('should not complete after 1 roll even if strike', () => {
       const frame: Frame = { rolls: [10], rule: 'strike', isLast: true };
       expect(service.isFrameCompleted(frame)).toBe(false);
@@ -49,29 +111,32 @@ describe('GameRuleService', () => {
       expect(service.isFrameCompleted(frame)).toBe(false);
     });
 
-    it('should complete after 2 rolls if open frame (no strike, no spare)', () => {
+    it('should complete after 2 rolls if open frame. no strike, no spare', () => {
       const frame: Frame = { rolls: [3, 5], rule: 'default', isLast: true };
       expect(service.isFrameCompleted(frame)).toBe(true);
     });
 
-    it('should not complete after 2 rolls if spare (entitled to 3rd bonus roll)', () => {
+    it('should not complete after 2 rolls if spare. entitled to 3rd bonus roll.', () => {
       const frame: Frame = { rolls: [4, 6], rule: 'spare', isLast: true };
       expect(service.isFrameCompleted(frame)).toBe(false);
+
+      it('should complete after 3 rolls. spare and bonus', () => {
+        const frame: Frame = { rolls: [5, 5, 8], rule: 'spare', isLast: true };
+        expect(service.isFrameCompleted(frame)).toBe(true);
+      })
     });
 
-    it('should not complete after 2 rolls if strike in first roll (entitled to 3rd roll)', () => {
+    it('should not complete after 2 rolls if strike in first roll.', () => {
       const frame: Frame = { rolls: [10, 10], rule: 'strike', isLast: true };
       expect(service.isFrameCompleted(frame)).toBe(false);
     });
 
-    it('should complete after 3 rolls (e.g. 3 strikes)', () => {
+    it('should complete after 3 rolls. 3 strikes', () => {
       const frame: Frame = { rolls: [10, 10, 10], rule: 'strike', isLast: true };
       expect(service.isFrameCompleted(frame)).toBe(true);
     });
 
-    it('should complete after 3 rolls (spare + bonus)', () => {
-      const frame: Frame = { rolls: [5, 5, 8], rule: 'spare', isLast: true };
-      expect(service.isFrameCompleted(frame)).toBe(true);
-    });
+
   });
+
 });
