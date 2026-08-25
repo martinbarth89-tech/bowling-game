@@ -1,59 +1,71 @@
-# BowlingGame
+### Bowling Game – Coding Challenge
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.7.
+Eine Angular-Anwendung zur Erfassung und Auswertung eines 10-Frame-Bowling-Spiels für einen Spieler. Der Fokus liegt auf einer klaren fachlichen Trennung, nachvollziehbaren Regeln, robustem Scoring und hoher Testabdeckung.
 
-## Development server
+---
 
-To start a local development server, run:
+### Inhaltsverzeichnis
+- Architektur & Verantwortlichkeiten
+- Fachliche Regeln & Edge Cases
+- Installation & Ausführung
+- Test-Strategie & Testausführung
+- Ausblick & Nächste Schritte
 
+---
+
+### Architektur & Verantwortlichkeiten
+
+Die Fach- und UI-Logik ist nach dem **Single Responsibility Principle (SRP)** strikt getrennt:
+
+1. `GameRuleService` (**Regeln & Validierung**):
+  - Bestimmt den Zustand eines Frames (`strike`, `spare`, `open`).
+  - Berechnet die maximal erlaubte Pin-Anzahl für den nächsten Wurf (unter Berücksichtigung von Standard-Frames und den Sonderregeln im 10. Frame).
+  - Validiert Eingaben (Gültigkeitsbereich 0–10, Frame-Pin-Limits).
+
+2. `ScoreCalculationService` (**Punkteberechnung / Scoring**):
+  - Pure Functionality ohne internen Zustand.
+  - Berechnet Boni für Strikes (nächste 2 Würfe) und Spares (nächster Wurf).
+  - Erzeugt ein neues Array mit kumulierten Gesamtpunkten pro Frame, ohne Originaldaten zu mutieren.
+
+3. `FrameService` (**Spielzustand & State Management**):
+  - Verwaltet den Zustand des laufenden Spiels (aktuelle Frames, Wurf-Fortschritt, Spielende).
+  - Nutzt Angular Signals für reaktive Zustandshaltung (`frames`, `gameCompleted`).
+  - Bietet Methoden wie `roll(pins)` und `resetGame()`.
+
+4. **UI-Komponenten (Präsentation & Usability)**:
+  - `AppComponent` / `ScoreboardComponent`: Eingabemaske mit direkter Validierung und Feedback bei Fehlern.
+  - `FrameViewComponent`: Übersichtliche Darstellung der einzelnen Frames (1–10) inkl. Wurf-Historie und Zwischenstand.
+
+---
+
+### Fachliche Regeln & Besonderheiten
+
+- **Standard-Frames (1–9):**
+  - Max. 2 Würfe pro Frame.
+  - Sofortiger Wechsel zum nächsten Frame bei Strike.
+- **10. Frame:**
+  - Bis zu 3 Würfe möglich: Bei Strike oder Spare wird ein zusätzlicher Bonuswurf freigeschaltet.
+  - Pin-Set wird nach einem Strike oder Spare im 10. Frame für den nächsten Wurf wieder auf 10 zurückgesetzt.
+- **Bonus-Berechnung:**
+  - Strike = 10 + Punkte der nächsten 2 Würfe.
+  - Spare = 10 + Punkte des nächsten 1 Wurfes.
+
+---
+
+### Installation & Ausführung
+
+#### Voraussetzungen
+- Node.js 22.0.x
+- npm
+
+#### Projekt starten
 ```bash
-ng serve
-```
+# Abhängigkeiten installieren
+npm install
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+# Entwicklungsserver starten
+npm start
+# oder: ng serve
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+# Tests mit coverage
+npm test
