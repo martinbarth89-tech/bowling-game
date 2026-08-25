@@ -28,7 +28,7 @@ export class FrameService {
   }
 
   private getNewFrame(isLastFrame = false): Frame {
-    return {rule: "open", rolls: [], isLast: isLastFrame};
+    return {type: "open", rolls: [], isLast: isLastFrame};
   }
 
   resetGame() {
@@ -83,7 +83,7 @@ export class FrameService {
   private updateFrame(frame: Frame, pins: number): Frame {
     return {
       ...frame,
-      rule: this.gameRuleService.getFrameRule(frame, pins),
+      type: this.gameRuleService.getFrameType(frame, pins),
       rolls: [...frame.rolls, pins]
     };
   }

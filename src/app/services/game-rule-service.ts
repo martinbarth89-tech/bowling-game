@@ -1,5 +1,5 @@
 import {inject, Service} from '@angular/core';
-import {Frame, GameRule} from '../models/bowling-models';
+import {Frame, FrameType} from '../models/bowling-models';
 import {ScoreCalculationService} from './score-calculation-service';
 
 @Service()
@@ -7,13 +7,13 @@ export class GameRuleService {
   private scoreCalculationService = inject(ScoreCalculationService);
   readonly MAX_PIN_AMOUNT: number = 10;
 
-  getFrameRule(frame: Frame, pins: number): GameRule {
+  getFrameType(frame: Frame, pins: number): FrameType {
     const currentFrameSum: number = this.scoreCalculationService.calculateSum(frame.rolls);
     const maxPinAmount = this.calculateMaxPinAmount(frame)
 
     // if it's the last frame but with bonus roll, return the current frame rule
     if (this.isLastFrameWithBonusRoll(frame)) {
-      return frame.rule
+      return frame.type
     }
 
     if (frame.rolls.length === 0 && pins === maxPinAmount) return 'strike';
@@ -25,13 +25,13 @@ export class GameRuleService {
 
   isFrameCompleted(frame: Frame): boolean {
     if (frame.isLast) {
-      if ((frame.rule === 'strike' || frame.rule === 'spare') && frame.rolls.length < 3) {
+      if ((frame.type === 'strike' || frame.type === 'spare') && frame.rolls.length < 3) {
         return false
       }
 
       return frame.rolls.length >= 2;
     } else {
-      return frame.rule === 'strike' || frame.rolls.length === 2;
+      return frame.type === 'strike' || frame.rolls.length === 2;
     }
   }
 
@@ -48,7 +48,7 @@ export class GameRuleService {
     if (this.isLastFrameWithBonusRoll(frame)) {
 
       // this happens when in the 10th frame the second roll is not a strike
-      if (frame.rule === 'strike' && frame.rolls.length >= 2 && frame.rolls[1] < 10) {
+      if (frame.type === 'strike' && frame.rolls.length >= 2 && frame.rolls[1] < 10) {
         return this.MAX_PIN_AMOUNT * 2;
       }
 
@@ -60,7 +60,7 @@ export class GameRuleService {
   }
 
   isLastFrameWithBonusRoll(frame: Frame): boolean {
-    return frame.isLast && (frame.rule === 'spare' || frame.rule === 'strike')
+    return frame.isLast && (frame.type === 'spare' || frame.type === 'strike')
   }
 }
 

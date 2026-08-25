@@ -6,8 +6,10 @@ export class ScoreCalculationService {
 
   calculateScoreForAllFrames(frames: Frame[]): Frame[] {
     return frames.map((frame, index) => {
-      frame.sum = this.calculateScoreForFrame(frames, index);
-      return {...frame};
+      return {
+        ...frame,
+        sum: this.calculateScoreForFrame(frames, index)
+      };
     });
   }
 
@@ -26,7 +28,7 @@ export class ScoreCalculationService {
     const previousScoreSum = this.getPreviousScoreSum(frames, targetFrameIndex);
     const finalFrameScore = frameRollsSum + previousScoreSum;
 
-    switch (targetFrame.rule) {
+    switch (targetFrame.type) {
       case 'strike':
         const strikeBonus = this.calculateBonus(frames, targetFrameIndex, 2);
         return finalFrameScore + strikeBonus;

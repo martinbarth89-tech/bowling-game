@@ -1,11 +1,11 @@
 export interface Frame {
   rolls: number[];
-  rule: GameRule;
+  type: FrameType;
   isLast: boolean;
   sum?: number;
 }
 
-export type GameRule = 'open' | 'spare' | 'strike';
+export type FrameType = 'open' | 'spare' | 'strike';
 
 export interface RollResult {
   success: boolean;

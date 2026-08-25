@@ -18,12 +18,12 @@ export class App {
   showError = signal<string | null>(null);
 
   roll(pins: number | null) {
-    const roleResult = this.frameService.roll(pins);
+    const rollResult = this.frameService.roll(pins);
 
-    if (roleResult.success) {
+    if (rollResult.success) {
       this.showError.set(null);
     } else {
-      this.showError.set(roleResult.message || '');
+      this.showError.set(rollResult.message || '');
     }
   }
 
