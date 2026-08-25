@@ -23,7 +23,7 @@ export class ScoreCalculationService {
     }
 
     const frameRollsSum = this.calculateSum(targetFrame.rolls);
-    const previousScoreSum = this.getAllPreviousScoreSum(frames, targetFrameIndex);
+    const previousScoreSum = this.getPreviousScoreSum(frames, targetFrameIndex);
     const finalFrameScore = frameRollsSum + previousScoreSum;
 
     switch (targetFrame.rule) {
@@ -48,13 +48,11 @@ export class ScoreCalculationService {
     return frames.slice(targetFrameIndex + 1).flatMap(frames => frames.rolls);
   }
 
-  private getAllPreviousScoreSum(frames: Frame[], targetFrameIndex: number) {
-    if (targetFrameIndex < 1) {
+  private getPreviousScoreSum(frames: Frame[], targetFrameIndex: number) {
+    if (targetFrameIndex <= 0) {
       return 0;
     }
 
-    const allPreviousSums = frames.slice(0, targetFrameIndex-1).flatMap(frames => frames.sum || 0);
-    console.log(allPreviousSums)
-    return this.calculateSum(allPreviousSums);
+    return frames[targetFrameIndex - 1]?.sum ?? 0;
   }
 }
