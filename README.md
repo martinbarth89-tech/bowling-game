@@ -4,16 +4,7 @@ Eine Angular-Anwendung zur Erfassung und Auswertung eines 10-Frame-Bowling-Spiel
 
 ---
 
-### Inhaltsverzeichnis
-- Architektur & Verantwortlichkeiten
-- Fachliche Regeln & Edge Cases
-- Installation & Ausführung
-- Test-Strategie & Testausführung
-- Ausblick & Nächste Schritte
-
----
-
-### Architektur & Verantwortlichkeiten
+### Architektur
 
 Die Fach- und UI-Logik ist nach dem **Single Responsibility Principle (SRP)** strikt getrennt:
 
@@ -69,3 +60,30 @@ npm start
 
 # Tests mit coverage
 npm test
+```
+
+---
+
+### Ausblick
+- **Multiplayer:**
+  - Nachträglich kann ohne großen Aufwand ein Multiplayer-Modus hinzugefügt werden.
+  - Dazu benötigt man eine Liste von Spieler-Objekten. Nachdem ein Frame des ersten Spielers beendet wurde, wird nicht in den nächsten Frame gewechselt, sondern zum nächsten Spieler.
+  - Das wiederholt sich so lange, bis alle Spieler diesen Frame beendet haben. Danach wird in den nächsten Frame gewechselt.
+  - Jedes Spieler-Objekt enthält dabei seine eigenen Frames als State, die in das Scorboard überführt werden.
+
+
+- **Usability verbessern:**
+  - Das Wurf/Roll-Eingabefeld sollte einen Validator für korrekte und im aktuellen Frame mögliche Werte erhalten.
+  - Alternativ ein Button-Pad: Es sollen nur die Buttons aktiviert sein, deren Pin-Anzahl im aktuellen Wurf noch geworfen werden kann.
+
+
+- **Visuelle Spielzüge & Physik:**
+  - Top-Down-Ansicht einer Bowlingbahn.
+  - Steuerung über die Maus: Zwischen Bowlingkugel und Cursor-Position wird der Richtungsvektor berechnet; die Entfernung der Maus zur Kugel bestimmt die Wurfstärke.
+  - Implementierung eines realistischen Kugelverhaltens inklusive physikalischen Einflusses auf jeden berührten Pin.
+  - Das Resultat kann direkt in meinen Algorithmus einfließen.
+
+
+- **Spielstand speichern:**
+  - Persistierung des aktuellen Spielstands im `localStorage`.
+
