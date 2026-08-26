@@ -9,14 +9,15 @@ Eine Angular-Anwendung zur Erfassung und Auswertung eines 10-Frame-Bowling-Spiel
 Die Fach- und UI-Logik ist nach dem **Single Responsibility Principle (SRP)** strikt getrennt:
 
 1. `GameRuleService` (**Regeln & Validierung**):
+  - Kapselt ausschließlich Bowling-Regeln. Hiermit sind Änderungen am Regelwerk möglich.
   - Bestimmt den Zustand eines Frames (`strike`, `spare`, `open`).
   - Berechnet die maximal erlaubte Pin-Anzahl für den nächsten Wurf (unter Berücksichtigung von Standard-Frames und den Sonderregeln im 10. Frame).
   - Validiert Eingaben (Gültigkeitsbereich 0–10, Frame-Pin-Limits).
 
 2. `ScoreCalculationService` (**Punkteberechnung / Scoring**):
-  - Pure Functionality ohne internen Zustand.
-  - Berechnet Boni für Strikes (nächste 2 Würfe) und Spares (nächster Wurf).
-  - Erzeugt ein neues Array mit kumulierten Gesamtpunkten pro Frame, ohne Originaldaten zu mutieren.
+  - Keinen State, nur Methoden.
+  - Berechnet Bonus für Strikes (nächste 2 Würfe) und Spares (nächster Wurf).
+  - Erzeugt ein neues Array mit Gesamtpunkten pro Frame, ohne Originaldaten zu mutieren.
 
 3. `FrameService` (**Spielzustand & State Management**):
   - Verwaltet den Zustand des laufenden Spiels (aktuelle Frames, Wurf-Fortschritt, Spielende).
