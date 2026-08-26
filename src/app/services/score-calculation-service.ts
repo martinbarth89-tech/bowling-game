@@ -5,10 +5,21 @@ import {Frame} from '../models/bowling-models';
 export class ScoreCalculationService {
 
   calculateScoreForAllFrames(frames: Frame[]): Frame[] {
-    return frames.map((frame, index) => {
-      frame.sum = this.calculateScoreForFrame(frames, index);
-      return frame
-    });
+    const updatedFrames: Frame[] = [];
+
+    for (let index = 0; index < frames.length; index++) {
+      const frame = frames[index];
+      const previousFrameScore = this.getPreviousScoreSum(updatedFrames, index);
+      const frameScore = this.calculateScoreForFrame(frames, index);
+      const frameScoreSum = frameScore === undefined ? undefined : previousFrameScore + frameScore;
+
+      updatedFrames.push({
+        ...frame,
+        sum: frameScoreSum
+      });
+    }
+
+    return updatedFrames;
   }
 
   calculateSum(points: number[]): number {
@@ -23,25 +34,23 @@ export class ScoreCalculationService {
     }
 
     const frameRollsSum = this.calculateSum(targetFrame.rolls);
-    const previousScoreSum = this.getPreviousScoreSum(frames, targetFrameIndex);
-    const finalFrameScore = frameRollsSum + previousScoreSum;
 
     switch (targetFrame.type) {
       case 'strike':
         const strikeBonus = this.calculateBonus(frames, targetFrameIndex, 2);
-        return finalFrameScore + strikeBonus;
+        return frameRollsSum + strikeBonus;
       case 'spare':
         const spareBonus = this.calculateBonus(frames, targetFrameIndex, 1);
-        return finalFrameScore + spareBonus;
+        return frameRollsSum + spareBonus;
       default:
-        return finalFrameScore;
+        return frameRollsSum;
     }
   }
 
   private calculateBonus(frames: Frame[], targetFrameIndex: number, bonusRolls: number): number {
     const allFollowingRolls = this.getAllFollowingRolls(frames, targetFrameIndex);
-    const nextTwoRolls = allFollowingRolls.slice(0, bonusRolls);
-    return this.calculateSum(nextTwoRolls);
+    const nextBonusRolls = allFollowingRolls.slice(0, bonusRolls);
+    return this.calculateSum(nextBonusRolls);
   }
 
   private getAllFollowingRolls(frames: Frame[], targetFrameIndex: number) {
